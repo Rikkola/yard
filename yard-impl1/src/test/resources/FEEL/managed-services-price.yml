@@ -13,6 +13,7 @@ elements:
   logic: 
     type: DecisionTable
     inputs: ['Customer Plan', 'Requests']
+    hitPolicy: PRIORITY
     rules:
     - when: ['="Free"', '<1000']
       then: 500
@@ -21,5 +22,7 @@ elements:
     - when: ['="Premium"', '<10000']
       then: 4000
     - when: ['="Premium"', '>=10000']
-      then: 4000 + 0.5 * Requests
+      then: 8888
+    - when: ['="Premium"', '>=10000']
+      then: 7777
 ---
