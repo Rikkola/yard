@@ -48,8 +48,8 @@ public class JsonParserTest {
         String s = new String(IoUtils.readBytesFromInputStream(this.getClass().getResourceAsStream("/simplified-ticket-score.json"), true));
         YaRD yaRD = new YaRD_JsonMapperImpl().fromJSON(s);
 
-        assertEquals("Incident was ack'd within 3 minutes", yaRD.getElements().get(0).getName());
-        DecisionTable dtable = (DecisionTable) yaRD.getElements().get(2).getLogic();
+        assertEquals("Level", yaRD.getElements().get(0).getName());
+        DecisionTable dtable = (DecisionTable) yaRD.getElements().get(0).getLogic();
         assertInstanceOf(InlineRule.class, dtable.getRules().get(0));
     }
 

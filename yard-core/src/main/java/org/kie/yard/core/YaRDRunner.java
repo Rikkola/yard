@@ -29,8 +29,15 @@ public class YaRDRunner {
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
     private final String name;
 
-    public YaRDRunner(final String yaml) throws IOException {
-        final YaRDParser parser = new YaRDParser(yaml);
+    public YaRDRunner(final String yaml) throws Exception {
+        final YaRDParser parser = YaRDParser.fromYaml(yaml);
+        name = parser.getModel().getName();
+        definitions = parser.getDefinitions();
+    }
+    public YaRDRunner(final Map map) throws IOException {
+        final String json = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
+
+        final YaRDParser parser = YaRDParser.fromJson(json);
         name = parser.getModel().getName();
         definitions = parser.getDefinitions();
     }

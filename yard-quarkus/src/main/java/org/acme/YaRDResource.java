@@ -22,10 +22,10 @@ public class YaRDResource {
             throw new IllegalArgumentException("Input has to have 'yard' and input 'input'.");
         }
 
-        final String yaml = (String) payload.get("yard");
+        final Map<String,Object> yardMap = (Map) payload.get("yard");
         final Map<String, Object> input = getInput(payload.get("input"));
 
-        return new YaRDRunner(yaml).evaluate(input);
+        return new YaRDRunner(yardMap).evaluate(input);
     }
 
     private Map<String, Object> getInput(Object input) {
