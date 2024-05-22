@@ -1,0 +1,51 @@
+{
+  "specVersion": "alpha",
+  "kind": "YaRD",
+  "name": "Traffic Violation",
+  "inputs": [
+    {
+      "name": "Tickets",
+      "type": "List"
+    }
+  ],
+  "elements": [
+    {
+      "name": "Incident was ack'd within 3 minutes",
+      "type": "Decision",
+      "logic": {
+        "type": "LiteralExpression",
+        "expression": "`Tickets`.stream().allMatch(t -> TimeUnit.MINUTES.convert(t.reported.getTime() - t.acked.getTime(), TimeUnit.MILLISECONDS) <= 3 );\n"
+      }
+    },
+    {
+      "name": "Incident was resolved within 5 minutes",
+      "type": "Decision",
+      "logic": {
+        "type": "LiteralExpression",
+        "expression": "`Tickets`.stream().allMatch(t -> TimeUnit.MINUTES.convert(t.reported.getTime() - t.resolved.getTime(), TimeUnit.MILLISECONDS) <= 5 );\n"
+      }
+    },
+    {
+      "name": "Bronze Level",
+      "type": "Decision",
+      "logic": {
+        "type": "DecisionTable",
+        "hitPolicy": "COLLECT COUNT",
+        "inputs": [
+          "Incident was ack'd within 3 minutes",
+          "Incident was resolved within 5 minutes"
+        ],
+        "rules": [
+          [
+            true,
+            "-"
+          ],
+          [
+            "-",
+            true
+          ]
+        ]
+      }
+    }
+  ]
+}

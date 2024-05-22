@@ -18,29 +18,22 @@
  */
 package org.kie.yard.api.model;
 
-import org.kie.j2cl.tools.json.mapper.annotation.JSONMapper;
-import org.kie.j2cl.tools.yaml.mapper.api.annotation.YAMLMapper;
+import org.kie.j2cl.tools.yaml.mapper.api.YAMLSerializer;
+import org.kie.j2cl.tools.yaml.mapper.api.internal.ser.YAMLSerializationContext;
+import org.kie.j2cl.tools.yaml.mapper.api.node.YamlMapping;
+import org.kie.j2cl.tools.yaml.mapper.api.node.YamlSequence;
 
-@YAMLMapper
-@JSONMapper
-public class Input {
 
-    private String name;
-    private String type;
+public class Rule_YamlSerializerImpl
+        implements YAMLSerializer<Rule> {
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public void serialize(YamlMapping yamlMapping, String s, Rule rule, YAMLSerializationContext yamlSerializationContext) {
+
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    @Override
+    public void serialize(YamlSequence yamlSequence, Rule rule, YAMLSerializationContext yamlSerializationContext) {
 
-    public String getName() {
-        return name;
-    }
-
-    public String getType() {
-        return type;
     }
 }
