@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 class YaRDResourceTest {
@@ -24,12 +24,16 @@ class YaRDResourceTest {
                      "Gold Complete" : false
                  }
                  """;
+        String builderString = new StringBuilder().append("{ \"yard\":").append(yard).append(", \"input\":").append(input).append(" }").toString();
+        System.out.println(builderString);
+        String result = "{\"Bronze Complete\":true,\"Silver Complete\":false,\"Gold Complete\":false,\"Level\":\"Bronze\"}";
+
         given()
                 .header(new Header("Content-Type", "application/json"))
-                .body("{ \"yard\":" + yard + ", \"input\":" + input + " }")
+                .body(builderString)
                 .when().post("/yard")
                 .then()
                 .statusCode(200)
-                .body(is("{\"Bronze Complete\":true,\"Silver Complete\":false,\"Gold Complete\":false,\"Level\":\"Bronze\"}"));
+                .body(is(result));
     }
 }

@@ -1,6 +1,6 @@
 specVersion: alpha
 kind: YaRD
-name: "Traffic Violation"
+name: "Level Score"
 inputs:
   - name: "Bronze Complete"
     type: boolean
@@ -9,15 +9,14 @@ inputs:
   - name: "Gold Complete"
     type: boolean
 elements:
-  - name: Level
+  - name: Score
     type: Decision
     logic:
       type: DecisionTable
       hitPolicy: ANY
       inputs: [ "Bronze Complete", "Silver Complete", "Gold Complete" ]
-      outputComponents: [ "Level" ]
-      # To reach the next level, previous one has to be fully completed
+      outputComponents: [ "Score" ]
       rules:
-        - [ true, true,  true,    'Gold' ]
-        - [ true, true,  false, 'Silver' ]
-        - [ true, false, false, 'Bronze' ]
+        - [ true, true,  true,  10 ]
+        - [ true, true,  false, 20 ]
+        - [ true, false, false, 30 ]
