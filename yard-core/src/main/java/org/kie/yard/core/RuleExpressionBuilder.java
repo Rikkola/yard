@@ -20,7 +20,8 @@ public class RuleExpressionBuilder {
     private final List<YamlRule> rules;
     private final String name = "gg";
 
-    public RuleExpressionBuilder(final YaRDDefinitions definitions, final RuleExpression ruleExpression) {
+    public RuleExpressionBuilder(final YaRDDefinitions definitions,
+                                 final RuleExpression ruleExpression) {
         this.definitions = definitions;
         this.rules = ruleExpression.getRules();
     }
@@ -40,14 +41,21 @@ public class RuleExpressionBuilder {
                 final Map<String, Object> context = getContext();
 
                 for (Given given : ruleDefinition.getWhen()) {
-                    Pattern1Def<Object> on = rule.on(from(given.getFrom()));
+                    final Pattern1Def<Object> on = rule.on(from(given.getFrom()));
+                    final String varName= given.getGiven();
 
                     for (String s : given.getHaving()) {
-                        final String[] split = split(s);
-                        on.filter((Predicate1<Object>) o -> toBoolean(new MVELLER(QuotedExprParsed.from(s)).doTheMVEL(context, definitions)));
+                        final String expression = varName + "." + s.trim();
+                        on.filter((Predicate1<Object>) o -> {
+                            context.put(varName,o);
+                            return toBoolean(new MVELLER(QuotedExprParsed.from(expression)).doTheMVEL(context, definitions));
+                        });
                     }
                 }
 
+                // TODO this is kind of one hit one result route
+                final StoreHandle<Object> result = StoreHandle.empty(Object.class);
+                rule.execute(result, storeHandle -> );
             }
 
         });
@@ -55,12 +63,7 @@ public class RuleExpressionBuilder {
 
     private Map<String, Object> getContext() {
         final HashMap<String, Object> inputs = new HashMap<>();
-
-
-        /// TODO inputs will be from inputs of the yard file
-
-
-        return definitions.evaluate(inputs);
+        return inputs;
     }
 
     private boolean toBoolean(Object o) {
@@ -69,15 +72,6 @@ public class RuleExpressionBuilder {
         } else {
             return false;
         }
-    }
-
-    private Index.ConstraintType operator(String s) {
-        return Index.ConstraintType.EQUAL;
-    }
-
-    private String[] split(final String having) {
-        return having.split("(?<=(==))|(?=(==))");
-
     }
 
     private DataSource<Object> from(final String from) {
