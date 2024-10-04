@@ -1,6 +1,5 @@
 package org.kie.yard.core;
 
-import org.drools.model.Index;
 import org.drools.model.functions.Predicate1;
 import org.drools.ruleunits.api.DataSource;
 import org.drools.ruleunits.dsl.RuleFactory;
@@ -18,11 +17,13 @@ import java.util.Map;
 public class RuleExpressionBuilder {
     private final YaRDDefinitions definitions;
     private final List<YamlRule> rules;
-    private final String name = "gg";
+    private final String name;
 
     public RuleExpressionBuilder(final YaRDDefinitions definitions,
+                                 final String name,
                                  final RuleExpression ruleExpression) {
         this.definitions = definitions;
+        this.name = name;
         this.rules = ruleExpression.getRules();
     }
 
@@ -33,6 +34,13 @@ public class RuleExpressionBuilder {
         for (Map.Entry<String, DataSource<Object>> e : definitions.inputs().entrySet()) {
             unit.registerDataSource(e.getKey(), e.getValue(), Object.class);
         }
+
+        // TODO get store handle type from definition
+        // TODO out of the box collection, map, primitive data type
+        final StoreHandle<Object> result = StoreHandle.empty(Object.class);
+
+        unit.registerGlobal(name, result);
+        definitions.outputs().put(name, result);
 
         return unit.defineRules(rulesFactory -> {
             for (YamlRule ruleDefinition : rules) {
@@ -54,8 +62,7 @@ public class RuleExpressionBuilder {
                 }
 
                 // TODO this is kind of one hit one result route
-                final StoreHandle<Object> result = StoreHandle.empty(Object.class);
-                rule.execute(result, storeHandle -> );
+                rule.execute(result, storeHandle -> storeHandle.set("TODO"));
             }
 
         });

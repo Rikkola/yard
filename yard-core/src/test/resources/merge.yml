@@ -17,8 +17,14 @@ elements:
               from: Jira 1
               having:
                 - status == "Blocking"
+          then:
+            list:
+              - add: $ticket
+        - when:
             - given: $ticket
               from: Jira 2
               having:
                 - status == "Blocking"
-          then: "d"
+          then:
+            list:
+              - add: $ticket

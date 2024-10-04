@@ -15,14 +15,16 @@ elements:
         - when:
             - given: $ticket
               from: Jira 1
-              having: status == "Blocking"
+              having:
+                - status == "Blocking"
           then:
             list:
               - add: $ticket
         - when:
             given: $ticket
             from: Jira 1
-            having: status == "Blocking"
+            having:
+              - status == "Blocking"
           then:
             list:
               - add: $ticket

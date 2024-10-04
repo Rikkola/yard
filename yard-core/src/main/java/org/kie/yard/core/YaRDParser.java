@@ -98,13 +98,14 @@ public class YaRDParser {
         }
     }
 
-    private Firable createDecisionLogic(String nameString, DecisionLogic decisionLogic) {
+    private Firable createDecisionLogic(final String name,
+                                        final DecisionLogic decisionLogic) {
         if (decisionLogic instanceof org.kie.yard.api.model.DecisionTable decisionTable) {
-            return new SyntheticRuleUnitWrapper(new DTableUnitBuilder(definitions, nameString, decisionTable).build());
+            return new SyntheticRuleUnitWrapper(new DTableUnitBuilder(definitions, name, decisionTable).build());
         } else if (decisionLogic instanceof org.kie.yard.api.model.LiteralExpression literalExpression) {
-            return new LiteralExpressionBuilder(model.getExpressionLang(), definitions, nameString, literalExpression).build();
+            return new LiteralExpressionBuilder(model.getExpressionLang(), definitions, name, literalExpression).build();
         } else if (decisionLogic instanceof RuleExpression ruleExpression) {
-            return new SyntheticRuleUnitWrapper(new RuleExpressionBuilder(definitions, ruleExpression).build());
+            return new SyntheticRuleUnitWrapper(new RuleExpressionBuilder(definitions, name, ruleExpression).build());
         } else {
             throw new UnsupportedOperationException("Not implemented.");
         }
