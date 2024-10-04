@@ -18,15 +18,18 @@
  */
 package org.kie.yard.core;
 
+import org.drools.ruleunits.api.DataSource;
+import org.drools.ruleunits.api.DataStore;
+import org.drools.ruleunits.api.SingletonStore;
+
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.drools.ruleunits.api.SingletonStore;
-
 public record YaRDDefinitions(
-        Map<String, SingletonStore<Object>> inputs,
+        Map<String, DataSource<Object>> inputs,
         List<Firable> units,
         Map<String, StoreHandle<Object>> outputs) {
 
@@ -37,7 +40,17 @@ public record YaRDDefinitions(
                 throw new IllegalArgumentException("Missing input key in context: " + inputKey);
             }
             Object inputValue = context.get(inputKey);
-            inputs.get(inputKey).set(inputValue);
+            if (inputs.get(inputKey) instanceof SingletonStore<Object> singletonStore) {
+                singletonStore.set(inputValue);
+            } else if (inputs.get(inputKey) instanceof DataStore<Object> dataStore) {
+                if (inputValue instanceof Collection collection) {
+                    for (Object o : collection) {
+                        dataStore.add(o);
+                    }
+                } else {
+                    throw new IllegalArgumentException("Store needs to be a collection.");
+                }
+            }
         }
         for (Firable unit : units) {
             unit.fire(context, this);
@@ -50,7 +63,12 @@ public record YaRDDefinitions(
     }
 
     private void reset() {
-        inputs.forEach((k, v) -> v.clear());
+        inputs.forEach((k, v) -> {
+            if (v instanceof SingletonStore<Object> vv) {
+                vv.clear();
+            }
+            // TODO multiple
+        });
         outputs.forEach((k, v) -> v.clear());
     }
 }

@@ -18,40 +18,27 @@
  */
 package org.kie.yard.core;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InsuranceBasePriceTest
+public class RulesMergeTest
         extends TestBase {
 
-    private static final String FILE_NAME = "/insurance-base-price.yml";
+    private static final String FILE_NAME = "/merge.yml";
 
     @Test
-    public void testScenario1() throws Exception {
+    public void testMPackage() throws Exception {
         final String CTX = """
                 {
-                  "Age": 47,
-                  "Previous incidents?": false
+                    "Jira 1":[{"status":"Blocking"},{"status":"Blocking"}],
+                    "Jira 2":[{"status":"Blocking"},{"status":"Blocking"}]
                 }
                 """;
         Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
-        assertThat(outputJSONasMap).hasFieldOrPropertyWithValue("Base price", 500);
-        assertThat(outputJSONasMap).hasFieldOrPropertyWithValue("Downpayment", 50.0);
-    }
-
-    @Test
-    public void testScenario2() throws Exception {
-        final String CTX = """
-                {
-                  "Age": 19,
-                  "Previous incidents?": true
-                }
-                """;
-        Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
-        assertThat(outputJSONasMap).hasFieldOrPropertyWithValue("Base price", 1000);
-        assertThat(outputJSONasMap).hasFieldOrPropertyWithValue("Downpayment", 70.0);
+        assertThat(outputJSONasMap).hasFieldOrPropertyWithValue("Merged data from two ticket streams", 40);
     }
 }

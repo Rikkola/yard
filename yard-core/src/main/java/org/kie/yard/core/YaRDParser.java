@@ -28,6 +28,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class YaRDParser {
     static YaRDParser fromModel(final YaRD model) throws IOException {
@@ -102,6 +103,8 @@ public class YaRDParser {
             return new SyntheticRuleUnitWrapper(new DTableUnitBuilder(definitions, nameString, decisionTable).build());
         } else if (decisionLogic instanceof org.kie.yard.api.model.LiteralExpression literalExpression) {
             return new LiteralExpressionBuilder(model.getExpressionLang(), definitions, nameString, literalExpression).build();
+        } else if (decisionLogic instanceof RuleExpression ruleExpression) {
+            return new SyntheticRuleUnitWrapper(new RuleExpressionBuilder(definitions, ruleExpression).build());
         } else {
             throw new UnsupportedOperationException("Not implemented.");
         }
@@ -113,7 +116,11 @@ public class YaRDParser {
             String nameString = hi.getName();
             @SuppressWarnings("unused")
             Class<?> typeRef = processType(hi.getType());
-            definitions.inputs().put(nameString, DataSource.createSingleton());
+            if(Objects.equals("Store", hi.getType())) {
+                definitions.inputs().put(nameString, DataSource.createStore());
+            } else {
+                definitions.inputs().put(nameString, DataSource.createSingleton());
+            }
         }
     }
 

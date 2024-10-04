@@ -27,7 +27,8 @@ import org.kie.j2cl.tools.yaml.mapper.api.annotation.YamlTypeInfo;
         key = "type",
         value = {
                 @YamlSubtype(alias = "DecisionTable", type = DecisionTable.class),
-                @YamlSubtype(alias = "LiteralExpression", type = LiteralExpression.class)
+                @YamlSubtype(alias = "LiteralExpression", type = LiteralExpression.class),
+                @YamlSubtype(alias = "Rules", type = RuleExpression.class)
         })
 @JsonbTypeInfo(
         key = "type",
