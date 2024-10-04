@@ -11,6 +11,7 @@ elements:
     type: Decision
     logic:
       type: Rules
+      result: List
       rules:
         - when:
             - given: $ticket
@@ -18,7 +19,7 @@ elements:
               having:
                 - status == "Blocking"
           then:
-            list:
+            result:
               - add: $ticket
         - when:
             - given: $ticket
@@ -26,5 +27,5 @@ elements:
               having:
                 - status == "Blocking"
           then:
-            list:
+            result:
               - add: $ticket

@@ -45,6 +45,7 @@ public class WhenThenRuleThenSerializer
         }
         return yamlNode.<String>asScalar().value().toLowerCase(Locale.ROOT);
     }
+    // TODO XXX DEAD CODE I THINK
 
     @Override
     public void serialize(YamlMapping yamlMapping, String s, Object o, YAMLSerializationContext yamlSerializationContext) {

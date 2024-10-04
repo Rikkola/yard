@@ -1,11 +1,18 @@
 package org.kie.yard.api.model;
 
+import org.kie.j2cl.tools.yaml.mapper.api.annotation.YAMLMapper;
+import org.kie.j2cl.tools.yaml.mapper.api.annotation.YamlTypeDeserializer;
+import org.kie.j2cl.tools.yaml.mapper.api.annotation.YamlTypeSerializer;
+
 import java.util.List;
 
+@YAMLMapper
 public class YamlRule {
 
     private List<Given> when;
-    private String then;
+    @YamlTypeDeserializer(YamlRuleThen_YamlDeserializerImpl.class)
+    @YamlTypeSerializer(YamlRuleThen_YamlSerializerImpl.class)
+    private YamlRuleThen then;
 
     public List<Given> getWhen() {
         return when;
@@ -15,11 +22,11 @@ public class YamlRule {
         this.when = when;
     }
 
-    public String getThen() {
+    public YamlRuleThen getThen() {
         return then;
     }
 
-    public void setThen(String then) {
+    public void setThen(YamlRuleThen then) {
         this.then = then;
     }
 }

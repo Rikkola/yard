@@ -9,21 +9,22 @@ import org.drools.ruleunits.dsl.patterns.Pattern1Def;
 import org.kie.yard.api.model.Given;
 import org.kie.yard.api.model.RuleExpression;
 import org.kie.yard.api.model.YamlRule;
+import org.kie.yard.api.model.YamlRuleThenListImpl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RuleExpressionBuilder {
     private final YaRDDefinitions definitions;
     private final List<YamlRule> rules;
     private final String name;
+    private final String resultType;
 
     public RuleExpressionBuilder(final YaRDDefinitions definitions,
                                  final String name,
                                  final RuleExpression ruleExpression) {
         this.definitions = definitions;
         this.name = name;
+        this.resultType = ruleExpression.getResult();
         this.rules = ruleExpression.getRules();
     }
 
@@ -35,9 +36,7 @@ public class RuleExpressionBuilder {
             unit.registerDataSource(e.getKey(), e.getValue(), Object.class);
         }
 
-        // TODO get store handle type from definition
-        // TODO out of the box collection, map, primitive data type
-        final StoreHandle<Object> result = StoreHandle.empty(Object.class);
+        final StoreHandle result = getResult();
 
         unit.registerGlobal(name, result);
         definitions.outputs().put(name, result);
@@ -50,22 +49,41 @@ public class RuleExpressionBuilder {
 
                 for (Given given : ruleDefinition.getWhen()) {
                     final Pattern1Def<Object> on = rule.on(from(given.getFrom()));
-                    final String varName= given.getGiven();
+                    final String varName = given.getGiven();
 
                     for (String s : given.getHaving()) {
                         final String expression = varName + "." + s.trim();
                         on.filter((Predicate1<Object>) o -> {
-                            context.put(varName,o);
+                            context.put(varName, o);
                             return toBoolean(new MVELLER(QuotedExprParsed.from(expression)).doTheMVEL(context, definitions));
                         });
                     }
                 }
 
                 // TODO this is kind of one hit one result route
-                rule.execute(result, storeHandle -> storeHandle.set("TODO"));
+                rule.execute(result, storeHandle -> {
+                    if (Objects.equals("List", resultType)) {
+                        if (storeHandle.get() instanceof List list) {
+                            if (ruleDefinition.getThen() instanceof YamlRuleThenListImpl thenList) {
+                                if (thenList.getFunctions().containsKey("add")) {
+                                    list.add(context.get(thenList.getFunctions().get("add")));
+                                }
+                            }
+                        }
+                    }
+                });
             }
-
         });
+    }
+
+    private StoreHandle getResult() {
+        if (Objects.equals("List", resultType)) {
+            final StoreHandle<Object> result = StoreHandle.empty(Object.class);
+            result.set(new ArrayList<>());
+            return result;
+        } else {
+            throw new IllegalStateException("Result type is not set correctly");
+        }
     }
 
     private Map<String, Object> getContext() {

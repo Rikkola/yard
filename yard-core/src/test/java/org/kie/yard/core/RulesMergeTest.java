@@ -20,7 +20,6 @@ package org.kie.yard.core;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,11 +30,11 @@ public class RulesMergeTest
     private static final String FILE_NAME = "/merge.yml";
 
     @Test
-    public void testMPackage() throws Exception {
+    public void testMerge() throws Exception {
         final String CTX = """
                 {
-                    "Jira 1":[{"status":"Blocking"},{"status":"Blocking"}],
-                    "Jira 2":[{"status":"Blocking"},{"status":"Blocking"}]
+                    "Jira 1":[{"name":"Ticket 1", "status":"Blocking"},{"name":"Ticket 2", "status":"Mild"}],
+                    "Jira 2":[{"name":"Ticket 3", "status":"Critical"},{"name":"Ticket 4", "status":"Blocking"}]
                 }
                 """;
         Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
