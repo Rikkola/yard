@@ -22,7 +22,7 @@ elements:
               - add: $ticket
         - when:
             given: $ticket
-            from: Jira 1
+            from: Jira 2
             having:
               - status == "Blocking"
           then:

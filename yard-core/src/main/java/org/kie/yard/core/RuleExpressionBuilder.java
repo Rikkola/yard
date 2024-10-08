@@ -45,35 +45,62 @@ public class RuleExpressionBuilder {
             for (YamlRule ruleDefinition : rules) {
                 final RuleFactory rule = rulesFactory.rule();
 
-                final Map<String, Object> context = getContext();
 
-                for (Given given : ruleDefinition.getWhen()) {
-                    final Pattern1Def<Object> on = rule.on(from(given.getFrom()));
-                    final String varName = given.getGiven();
+                final Pattern1Def<Object> on = doWhen(ruleDefinition, rule);
+                // TODO take given count, expect that amount of Block
+                int givenCount = ruleDefinition.getWhen().size();
 
-                    for (String s : given.getHaving()) {
-                        final String expression = varName + "." + s.trim();
-                        on.filter((Predicate1<Object>) o -> {
-                            context.put(varName, o);
-                            return toBoolean(new MVELLER(QuotedExprParsed.from(expression)).doTheMVEL(context, definitions));
+                switch (givenCount) {
+                    case 1:
+                        on.execute(result, (storeHandle, a) -> {
+                            final Map<String, Object> context = new HashMap<>();
+                            context.put(ruleDefinition.getWhen().get(0).getGiven(), a);
+                            doThen(ruleDefinition, storeHandle, context);
                         });
-                    }
-                }
 
-                // TODO this is kind of one hit one result route
-                rule.execute(result, storeHandle -> {
-                    if (Objects.equals("List", resultType)) {
-                        if (storeHandle.get() instanceof List list) {
-                            if (ruleDefinition.getThen() instanceof YamlRuleThenListImpl thenList) {
-                                if (thenList.getFunctions().containsKey("add")) {
-                                    list.add(context.get(thenList.getFunctions().get("add")));
-                                }
-                            }
-                        }
-                    }
-                });
+                        // TODO 2 and 3
+                }
             }
         });
+    }
+
+    private Pattern1Def<Object> doWhen(final YamlRule ruleDefinition,
+                                       final RuleFactory rule) {
+        final Iterator<Given> iterator = ruleDefinition.getWhen().iterator();
+        while (iterator.hasNext()) {
+            final Given given = iterator.next();
+            final Pattern1Def<Object> on = rule.on(from(given.getFrom()));
+            final String varName = given.getGiven();
+
+            for (String s : given.getHaving()) {
+                final String expression = varName + "." + s.trim();
+                on.filter((Predicate1<Object>) o -> {
+                    final Map<String, Object> context = getContext();
+                    context.put(varName, o);
+                    boolean aBoolean = toBoolean(new MVELLER(QuotedExprParsed.from(expression)).doTheMVEL(context, definitions));
+                    return aBoolean;
+                });
+            }
+            if (!iterator.hasNext()) {
+                return on;
+
+            }
+        }
+        return null; // TODO or exception
+    }
+
+    private void doThen(final YamlRule ruleDefinition,
+                        final StoreHandle storeHandle,
+                        final Map<String, Object> context) {
+        if (Objects.equals("List", resultType)) {
+            if (storeHandle.get() instanceof List list) {
+                if (ruleDefinition.getThen() instanceof YamlRuleThenListImpl thenList) {
+                    if (thenList.getFunctions().containsKey("add")) {
+                        list.add(context.get(thenList.getFunctions().get("add")));
+                    }
+                }
+            }
+        }
     }
 
     private StoreHandle getResult() {
@@ -100,7 +127,6 @@ public class RuleExpressionBuilder {
     }
 
     private DataSource<Object> from(final String from) {
-        DataSource<Object> ds = definitions.inputs().get(from);
-        return ds;
+        return definitions.inputs().get(from);
     }
 }

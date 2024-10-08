@@ -20,6 +20,8 @@ package org.kie.yard.core;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,11 +35,24 @@ public class RulesMergeTest
     public void testMerge() throws Exception {
         final String CTX = """
                 {
-                    "Jira 1":[{"name":"Ticket 1", "status":"Blocking"},{"name":"Ticket 2", "status":"Mild"}],
+                    "Jira 1":[{"name":"Ticket 1", "status":"Blocking"},{"name":"Ticket 2", "status":"Minor"}],
                     "Jira 2":[{"name":"Ticket 3", "status":"Critical"},{"name":"Ticket 4", "status":"Blocking"}]
                 }
                 """;
-        Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
-        assertThat(outputJSONasMap).hasFieldOrPropertyWithValue("Merged data from two ticket streams", 40);
+        final Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
+        final List<Map<String, Object>> o = (List<Map<String, Object>>) outputJSONasMap.get("Merged data from two ticket streams");
+
+        assertThat(o.size()).isEqualTo(2);
+        assertThat(o).contains(toTicketMap("Ticket 1"));
+        assertThat(o).contains(toTicketMap("Ticket 4"));
+        // 1 and 3
+    }
+
+    private Map<String, Object> toTicketMap(final String name) {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("status", "Blocking");
+
+        return map;
     }
 }
