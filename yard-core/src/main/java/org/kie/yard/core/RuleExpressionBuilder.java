@@ -13,8 +13,7 @@ import org.kie.yard.api.model.*;
 
 import java.util.*;
 
-import static org.drools.ruleunits.dsl.Accumulators.collect;
-import static org.drools.ruleunits.dsl.Accumulators.sum;
+import static org.drools.ruleunits.dsl.Accumulators.*;
 
 public class RuleExpressionBuilder {
     private final YaRDDefinitions definitions;
@@ -99,7 +98,7 @@ public class RuleExpressionBuilder {
 
                 );
             }
-            // TODO if not then error
+            throw new IllegalStateException("Unknown when section.");
         }
         // TODO is this the best approach?
         throw new IllegalStateException("What happened?");
@@ -110,23 +109,17 @@ public class RuleExpressionBuilder {
         final String function = accumulator.getFunction();
         final String functionName = function.substring(0, function.indexOf('('));
         final String functionParameter = function.substring(0, function.length() - 1).substring(functionName.length() + 1);
-        switch (functionName) {
-            case "collect":
-                return collect(
-                        o -> {
-//                    return new ArrayList<>();
-                            return o;
-                        });
-            case "sum":
-                return sum((a) -> {
-                    final Map<String, Object> context = new HashMap<>();
-                    context.put(groupBy.getGiven().getGiven(), a);
-                    return Integer.parseInt((String) new MVELLER(QuotedExprParsed.from(functionParameter)).doTheMVEL(context, definitions));
-                });
-        }
-        return collect(); // TODO exception
+        return switch (functionName) {
+            case "count" -> count();
+            case "collect" -> collect();
+            case "sum" -> sum((a) -> {
+                final Map<String, Object> context = new HashMap<>();
+                context.put(groupBy.getGiven().getGiven(), a);
+                return Integer.parseInt((String) new MVELLER(QuotedExprParsed.from(functionParameter)).doTheMVEL(context, definitions));
+            });
+            default -> collect();
+        };
     }
-
 
     private PatternDef formPattern(final RuleFactory rule,
                                    final Given given) {

@@ -31,26 +31,41 @@ public class RulesGroupByTest
         extends TestBase {
 
     private static final String FILE_NAME = "/groupby.yml";
+    private String data = """
+            {
+                "Persons":
+                [
+                    {"name":"Toni", "age":"12", "kids": "0"},
+                    {"name":"Lars", "age":"24", "kids": "0"},
+                    {"name":"David", "age":"29", "kids": "2"},
+                    {"name":"Eric", "age":"21", "kids": "1"},
+                    {"name":"Jens", "age":"40", "kids": "2"},
+                    {"name":"Jens", "age":"44", "kids": "2"},
+                    {"name":"John", "age":"104", "kids": "3"}
+                ]
+            }
+            """;
 
     @Test
     public void testGroupByAndSumByInitial() throws Exception {
-        final String CTX = """
-                {
-                    "Persons":
-                    [
-                        {"name":"Toni", "age":"12", "kids": "3"},
-                        {"name":"Lars", "age":"24", "kids": "0"},
-                        {"name":"Jens", "age":"40", "kids": "2"},
-                        {"name":"John", "age":"104", "kids": "3"}
-                    ]
-                }
-                """;
-        final Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
+        final Map<String, Object> outputJSONasMap = evaluate(data, FILE_NAME);
         final Map<String, Object> o = (Map<String, Object>) outputJSONasMap.get("Kids by parent initials");
 
-        assertThat(o.size()).isEqualTo(2);
-        assertEquals(5,o.get("J"));
+        assertThat(o.size()).isEqualTo(4);
+        assertEquals(7,o.get("J"));
         assertEquals(0,o.get("L"));
+        assertEquals(2,o.get("D"));
+        assertEquals(1,o.get("E"));
     }
 
+    @Test
+    public void testCountByDecade() throws Exception {
+        final Map<String, Object> outputJSONasMap = evaluate(data, FILE_NAME);
+        final Map<String, Object> o = (Map<String, Object>) outputJSONasMap.get("Parent count by decade");
+
+        assertThat(o.size()).isEqualTo(3);
+        assertEquals(2,o.get("20"));
+        assertEquals(1,o.get("100"));
+        assertEquals(2,o.get("40"));
+    }
 }
