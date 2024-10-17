@@ -1,15 +1,15 @@
 package org.kie.yard.api.model;
 
 public class Grouping {
-    private String function;
+    private String by;
     private String as;
 
-    public String getFunction() {
-        return function;
+    public String getBy() {
+        return by;
     }
 
-    public void setFunction(String function) {
-        this.function = function;
+    public void setBy(String by) {
+        this.by = by;
     }
 
     public String getAs() {

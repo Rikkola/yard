@@ -57,7 +57,7 @@ public class When_YamlDeserializerImpl
 
     private Grouping createGrouping(YamlMapping groupingNode) {
         final Grouping grouping = new Grouping();
-        grouping.setFunction((String) groupingNode.getNode("function").asScalar().value());
+        grouping.setBy((String) groupingNode.getNode("by").asScalar().value());
         grouping.setAs((String) groupingNode.getNode("as").asScalar().value());
         return grouping;
     }

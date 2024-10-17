@@ -138,7 +138,7 @@ public class RuleExpressionBuilder {
         final Grouping grouping = groupBy.getGrouping();
         final Map<String, Object> context = getContext();
         context.put(groupBy.getGiven().getGiven(), o);
-        final MVELLER mveller = new MVELLER(QuotedExprParsed.from(grouping.getFunction()));
+        final MVELLER mveller = new MVELLER(QuotedExprParsed.from(grouping.getBy()));
         return mveller.doTheMVEL(context, definitions);
     }
 
