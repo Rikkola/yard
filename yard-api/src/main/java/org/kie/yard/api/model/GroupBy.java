@@ -1,19 +1,18 @@
 package org.kie.yard.api.model;
 
-import java.util.List;
 
 public class GroupBy implements When {
-    private List<Given> given;
+    private Given given;
 
     private Grouping grouping;
 
-    private List<Accumulator> accumulators;
+    private Accumulator accumulator;
 
-    public List<Given> getGiven() {
+    public Given getGiven() {
         return given;
     }
 
-    public void setGiven(List<Given> given) {
+    public void setGiven(Given given) {
         this.given = given;
     }
 
@@ -25,11 +24,11 @@ public class GroupBy implements When {
         this.grouping = grouping;
     }
 
-    public List<Accumulator> getAccumulators() {
-        return accumulators;
+    public Accumulator getAccumulators() {
+        return accumulator;
     }
 
-    public void setAccumulators(List<Accumulator> accumulators) {
-        this.accumulators = accumulators;
+    public void setAccumulators(Accumulator accumulator) {
+        this.accumulator = accumulator;
     }
 }

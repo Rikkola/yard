@@ -69,7 +69,7 @@ public class RuleExpressionBuilder {
                                     .execute(result, (storeHandle, grouper, group) -> {
                                         final Map<String, Object> context = new HashMap<>();
                                         context.put(groupBy.getGrouping().getAs(), grouper);
-                                        context.put(groupBy.getAccumulators().get(0).getAs(), group);
+                                        context.put(groupBy.getAccumulators().getAs(), group);
                                         doThen(ruleDefinition, storeHandle, context);
                                     });
                         }
@@ -91,7 +91,7 @@ public class RuleExpressionBuilder {
                 }
             }
             if (when instanceof GroupBy groupBy) {
-                final Given given = groupBy.getGiven().get(0); // TODO iterate
+                final Given given = groupBy.getGiven();
                 return rule.groupBy(
                         r -> formPattern(r, given),
                         o -> getGroupingFunction(o, groupBy, definitions),
@@ -106,7 +106,7 @@ public class RuleExpressionBuilder {
     }
 
     private static Accumulator1 getAccumulator(final GroupBy groupBy, YaRDDefinitions definitions) {
-        final Accumulator accumulator = groupBy.getAccumulators().get(0);
+        final Accumulator accumulator = groupBy.getAccumulators();
         final String function = accumulator.getFunction();
         final String functionName = function.substring(0, function.indexOf('('));
         final String functionParameter = function.substring(0, function.length() - 1).substring(functionName.length() + 1);
@@ -120,7 +120,7 @@ public class RuleExpressionBuilder {
             case "sum":
                 return sum((a) -> {
                     final Map<String, Object> context = new HashMap<>();
-                    context.put(groupBy.getGiven().get(0).getGiven(), a);
+                    context.put(groupBy.getGiven().getGiven(), a);
                     return Integer.parseInt((String) new MVELLER(QuotedExprParsed.from(functionParameter)).doTheMVEL(context, definitions));
                 });
         }
@@ -138,7 +138,7 @@ public class RuleExpressionBuilder {
                                        final YaRDDefinitions definitions) {
         final Grouping grouping = groupBy.getGrouping();
         final Map<String, Object> context = getContext();
-        context.put(groupBy.getGiven().get(0).getGiven(), o); // TODO what if there is more than one given?
+        context.put(groupBy.getGiven().getGiven(), o);
         final MVELLER mveller = new MVELLER(QuotedExprParsed.from(grouping.getFunction()));
         return mveller.doTheMVEL(context, definitions);
     }

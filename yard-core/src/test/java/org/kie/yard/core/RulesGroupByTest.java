@@ -46,7 +46,7 @@ public class RulesGroupByTest
                 }
                 """;
         final Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
-        final Map<String, Object> o = (Map<String, Object>) outputJSONasMap.get("Group");
+        final Map<String, Object> o = (Map<String, Object>) outputJSONasMap.get("Kids by parent initials");
 
         assertThat(o.size()).isEqualTo(2);
         assertEquals(5,o.get("J"));

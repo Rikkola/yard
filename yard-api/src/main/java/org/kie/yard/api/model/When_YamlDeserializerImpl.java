@@ -6,10 +6,8 @@ import org.kie.j2cl.tools.yaml.mapper.api.internal.deser.YAMLDeserializationCont
 import org.kie.j2cl.tools.yaml.mapper.api.node.NodeType;
 import org.kie.j2cl.tools.yaml.mapper.api.node.YamlMapping;
 import org.kie.j2cl.tools.yaml.mapper.api.node.YamlNode;
-import org.kie.j2cl.tools.yaml.mapper.api.node.YamlSequence;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class When_YamlDeserializerImpl
         implements YAMLDeserializer<When> {
@@ -27,33 +25,20 @@ public class When_YamlDeserializerImpl
             return createGiven(mapping);
         } else if (mapping.keys().contains("groupBy")) {
             final GroupBy groupBy = new GroupBy();
-            groupBy.setGiven(createGiven(mapping.getNode("groupBy").asSequence()));
+            groupBy.setGiven(createGiven(mapping.getNode("groupBy").asMapping()));
             groupBy.setGrouping(createGrouping(mapping.getNode("grouping").asMapping()));
-            groupBy.setAccumulators(createAccumulators(mapping.getNode("accumulators").asSequence()));
+            groupBy.setAccumulators(createAccumulator(mapping.getNode("accumulator").asMapping()));
             return groupBy;
         }
         throw new IllegalStateException("Unknown element, should be given or groupBy");
     }
 
-    private List<Accumulator> createAccumulators(YamlSequence groupBy) {
-        final ArrayList<Accumulator> accumulators = new ArrayList<>();
-        for (YamlNode yamlNode : groupBy) {
-            final Accumulator accumulator = new Accumulator();
-            accumulator.setFunction((String)yamlNode.asMapping().getNode("function").asScalar().value());
-            accumulator.setAs((String)yamlNode.asMapping().getNode("as").asScalar().value());
-            accumulators.add(accumulator);
-        }
-
-        return accumulators;
-    }
-
-    private List<Given> createGiven(YamlSequence groupBy) {
-        final ArrayList<Given> result = new ArrayList<>();
-        for (YamlNode yamlNode : groupBy) {
-            result.add(createGiven(yamlNode.asMapping()));
-        }
-
-        return result;
+    private Accumulator createAccumulator(final YamlMapping groupBy) {
+        final Accumulator accumulator = new Accumulator();
+        accumulator.setFunction((String) groupBy.getNode("function").asScalar().value());
+        accumulator.setAs((String) groupBy.getNode("as").asScalar().value());
+        // TODO check what happens with numbers
+        return accumulator;
     }
 
     private static Given createGiven(YamlMapping mapping) {
@@ -69,8 +54,8 @@ public class When_YamlDeserializerImpl
 
     private Grouping createGrouping(YamlMapping groupingNode) {
         final Grouping grouping = new Grouping();
-        grouping.setFunction((String)groupingNode.getNode("function").asScalar().value());
-        grouping.setAs((String)groupingNode.getNode("as").asScalar().value());
+        grouping.setFunction((String) groupingNode.getNode("function").asScalar().value());
+        grouping.setAs((String) groupingNode.getNode("as").asScalar().value());
         return grouping;
     }
 }

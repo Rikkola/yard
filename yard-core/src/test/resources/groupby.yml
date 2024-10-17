@@ -5,7 +5,7 @@ inputs:
   - name: Persons
     type: Store
 elements:
-  - name: Group
+  - name: Kids by parent initials
     type: Decision
     logic:
       type: Rules
@@ -13,18 +13,42 @@ elements:
       rules:
         - when:
             - groupBy:
-                - given: $p
+                  given: $p
                   from: Persons
                   having:
                     - age >= 18
               grouping:
                   function: $p.name[0]
                   as: $initial
-              accumulators:
-                - function: sum($p.kids)
+              accumulator:
+                  function: sum($p.kids)
                   as: $kidCount
           then:
             result:
               - put:
                   key: $initial
                   value: $kidCount
+
+#  - name: Group
+#    type: Decision
+#    logic:
+#      type: Rules
+#      result: Map
+#      rules:
+#        - when:
+#            - groupBy:
+#                given: $p
+#                from: Persons
+#                having:
+#                  - age >= 18
+#              grouping:
+#                function: $p.name[0]
+#                as: $initial
+#              accumulator:
+#                function: sum($p.kids)
+#                as: $kidCount
+#          then:
+#            result:
+#              - put:
+#                  key: $initial
+#                  value: $kidCount
