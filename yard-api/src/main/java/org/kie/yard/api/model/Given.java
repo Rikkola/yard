@@ -2,7 +2,7 @@ package org.kie.yard.api.model;
 
 import java.util.List;
 
-public class Given {
+public class Given implements When {
     private String given;
     private String from;
     private List<String> having;

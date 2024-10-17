@@ -5,13 +5,16 @@ import org.drools.ruleunits.api.DataSource;
 import org.drools.ruleunits.dsl.RuleFactory;
 import org.drools.ruleunits.dsl.SyntheticRuleUnit;
 import org.drools.ruleunits.dsl.SyntheticRuleUnitBuilder;
+import org.drools.ruleunits.dsl.accumulate.Accumulator1;
+import org.drools.ruleunits.dsl.accumulate.GroupByPattern1;
 import org.drools.ruleunits.dsl.patterns.Pattern1Def;
-import org.kie.yard.api.model.Given;
-import org.kie.yard.api.model.RuleExpression;
-import org.kie.yard.api.model.YamlRule;
-import org.kie.yard.api.model.YamlRuleThenListImpl;
+import org.drools.ruleunits.dsl.patterns.PatternDef;
+import org.kie.yard.api.model.*;
 
 import java.util.*;
+
+import static org.drools.ruleunits.dsl.Accumulators.collect;
+import static org.drools.ruleunits.dsl.Accumulators.sum;
 
 public class RuleExpressionBuilder {
     private final YaRDDefinitions definitions;
@@ -42,51 +45,118 @@ public class RuleExpressionBuilder {
         definitions.outputs().put(name, result);
 
         return unit.defineRules(rulesFactory -> {
-            for (YamlRule ruleDefinition : rules) {
+            for (final YamlRule ruleDefinition : rules) {
                 final RuleFactory rule = rulesFactory.rule();
 
 
-                final Pattern1Def<Object> on = doWhen(ruleDefinition, rule);
+                final PatternDef on = doWhen(ruleDefinition, rule);
                 // TODO take given count, expect that amount of Block
-                int givenCount = ruleDefinition.getWhen().size();
+                final int givenCount = ruleDefinition.getWhen().size();
 
                 switch (givenCount) {
                     case 1:
-                        on.execute(result, (storeHandle, a) -> {
-                            final Map<String, Object> context = new HashMap<>();
-                            context.put(ruleDefinition.getWhen().get(0).getGiven(), a);
-                            doThen(ruleDefinition, storeHandle, context);
-                        });
-
+                        if (on instanceof Pattern1Def on1) {
+                            ((Pattern1Def<Object>) on1).execute(result, (storeHandle, a) -> {
+                                final Map<String, Object> context = new HashMap<>();
+                                if (ruleDefinition.getWhen().get(0) instanceof Given given) {
+                                    context.put(given.getGiven(), a);
+                                }
+                                doThen(ruleDefinition, storeHandle, context);
+                            });
+                        } else if (on instanceof GroupByPattern1 on1) {
+                            final GroupBy groupBy = (GroupBy) ruleDefinition.getWhen().get(0); // TODO 0?
+                            ((GroupByPattern1<Object, Object, Object>) on1)
+                                    .execute(result, (storeHandle, grouper, group) -> {
+                                        final Map<String, Object> context = new HashMap<>();
+                                        context.put(groupBy.getGrouping().getAs(), grouper);
+                                        context.put(groupBy.getAccumulators().get(0).getAs(), group);
+                                        doThen(ruleDefinition, storeHandle, context);
+                                    });
+                        }
                         // TODO 2 and 3
                 }
             }
         });
     }
 
-    private Pattern1Def<Object> doWhen(final YamlRule ruleDefinition,
-                                       final RuleFactory rule) {
-        final Iterator<Given> iterator = ruleDefinition.getWhen().iterator();
+    private PatternDef doWhen(final YamlRule ruleDefinition,
+                              final RuleFactory rule) {
+        final Iterator<When> iterator = ruleDefinition.getWhen().iterator();
         while (iterator.hasNext()) {
-            final Given given = iterator.next();
-            final Pattern1Def<Object> on = rule.on(from(given.getFrom()));
-            final String varName = given.getGiven();
-
-            for (String s : given.getHaving()) {
-                final String expression = varName + "." + s.trim();
-                on.filter((Predicate1<Object>) o -> {
-                    final Map<String, Object> context = getContext();
-                    context.put(varName, o);
-                    boolean aBoolean = toBoolean(new MVELLER(QuotedExprParsed.from(expression)).doTheMVEL(context, definitions));
-                    return aBoolean;
-                });
+            final When when = iterator.next();
+            if (when instanceof Given given) {
+                final Pattern1Def<Object> on = getObjectPattern(rule, given);
+                if (!iterator.hasNext()) {
+                    return on;
+                }
             }
-            if (!iterator.hasNext()) {
-                return on;
+            if (when instanceof GroupBy groupBy) {
+                final Given given = groupBy.getGiven().get(0); // TODO iterate
+                return rule.groupBy(
+                        r -> formPattern(r, given),
+                        o -> getGroupingFunction(o, groupBy, definitions),
+                        getAccumulator(groupBy, definitions)
 
+                );
             }
+            // TODO if not then error
         }
-        return null; // TODO or exception
+        // TODO is this the best approach?
+        throw new IllegalStateException("What happened?");
+    }
+
+    private static Accumulator1 getAccumulator(final GroupBy groupBy, YaRDDefinitions definitions) {
+        final Accumulator accumulator = groupBy.getAccumulators().get(0);
+        final String function = accumulator.getFunction();
+        final String functionName = function.substring(0, function.indexOf('('));
+        final String functionParameter = function.substring(0, function.length() - 1).substring(functionName.length() + 1);
+        switch (functionName) {
+            case "collect":
+                return collect(
+                        o -> {
+//                    return new ArrayList<>();
+                            return o;
+                        });
+            case "sum":
+                return sum((a) -> {
+                    final Map<String, Object> context = new HashMap<>();
+                    context.put(groupBy.getGiven().get(0).getGiven(), a);
+                    return Integer.parseInt((String) new MVELLER(QuotedExprParsed.from(functionParameter)).doTheMVEL(context, definitions));
+                });
+        }
+        return collect(); // TODO exception
+    }
+
+
+    private PatternDef formPattern(final RuleFactory rule,
+                                   final Given given) {
+        return getObjectPattern(rule, given);
+    }
+
+    private Object getGroupingFunction(final Object o,
+                                       final GroupBy groupBy,
+                                       final YaRDDefinitions definitions) {
+        final Grouping grouping = groupBy.getGrouping();
+        final Map<String, Object> context = getContext();
+        context.put(groupBy.getGiven().get(0).getGiven(), o); // TODO what if there is more than one given?
+        final MVELLER mveller = new MVELLER(QuotedExprParsed.from(grouping.getFunction()));
+        return mveller.doTheMVEL(context, definitions);
+    }
+
+    private Pattern1Def<Object> getObjectPattern(final RuleFactory rule,
+                                                 final Given given) {
+        final Pattern1Def<Object> on = rule.on(from(given.getFrom()));
+        final String varName = given.getGiven();
+
+        for (String s : given.getHaving()) {
+            final String expression = varName + "." + s.trim();
+            on.filter((Predicate1<Object>) o -> {
+                final Map<String, Object> context = getContext();
+                context.put(varName, o);
+                return toBoolean(new MVELLER(QuotedExprParsed.from(expression)).doTheMVEL(context, definitions));
+            });
+        }
+        return on;
     }
 
     private void doThen(final YamlRule ruleDefinition,
@@ -100,6 +170,17 @@ public class RuleExpressionBuilder {
                     }
                 }
             }
+        } else if (Objects.equals("Map", resultType)) {
+            if (storeHandle.get() instanceof Map map) {
+                if (ruleDefinition.getThen() instanceof YamlRuleThenListImpl thenList) {
+                    if (thenList.getFunctions().containsKey("put")) {
+                        final Map<String, String> o = (Map<String, String>) thenList.getFunctions().get("put");
+                        final Object key = new MVELLER(QuotedExprParsed.from(o.get("key"))).doTheMVEL(context, definitions);
+                        final Object value = new MVELLER(QuotedExprParsed.from(o.get("value"))).doTheMVEL(context, definitions);
+                        map.put(key, value);
+                    }
+                }
+            }
         }
     }
 
@@ -107,6 +188,10 @@ public class RuleExpressionBuilder {
         if (Objects.equals("List", resultType)) {
             final StoreHandle<Object> result = StoreHandle.empty(Object.class);
             result.set(new ArrayList<>());
+            return result;
+        } else if (Objects.equals("Map", resultType)) {
+            final StoreHandle<Object> result = StoreHandle.empty(Object.class);
+            result.set(new HashMap<>());
             return result;
         } else {
             throw new IllegalStateException("Result type is not set correctly");

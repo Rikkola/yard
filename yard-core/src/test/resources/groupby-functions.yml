@@ -1,0 +1,32 @@
+specVersion: alpha
+kind: YaRD
+name: 'BasePrice'
+inputs:
+  - name: Persons
+    type: Store
+  - name: Tickets
+    type: Store
+elements:
+  - name: Group week old tickets by type
+    type: Decision
+    logic:
+      type: Rules
+      result: Map
+      rules:
+        - when:
+            - groupBy:
+                - given: $t
+                  from: Tickets
+                  having:
+                    - days(createdAt) - days(currentTime()) <= 7
+              grouping:
+                function: $t.priority
+                as: $priority
+              accumulators:
+                - function: count()
+                  as: $count
+          then:
+            result:
+              - put:
+                  key: $priority
+                  value: $count #DRL version has a filter for results
