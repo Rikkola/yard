@@ -107,18 +107,24 @@ public class RuleExpressionBuilder {
     private static Accumulator1 getAccumulator(final GroupBy groupBy, YaRDDefinitions definitions) {
         final Accumulator accumulator = groupBy.getAccumulators();
         final String function = accumulator.getFunction();
-        final String functionName = function.substring(0, function.indexOf('('));
-        final String functionParameter = function.substring(0, function.length() - 1).substring(functionName.length() + 1);
-        return switch (functionName) {
-            case "count" -> count();
-            case "collect" -> collect();
-            case "sum" -> sum((a) -> {
-                final Map<String, Object> context = new HashMap<>();
-                context.put(groupBy.getGiven().getGiven(), a);
-                return Integer.parseInt((String) new MVELLER(QuotedExprParsed.from(functionParameter)).doTheMVEL(context, definitions));
-            });
-            default -> collect();
-        };
+        final String functionParameter = accumulator.getParameter();
+        if (functionParameter == null || functionParameter.trim().isEmpty()) {
+            return switch (function) {
+                case "count" -> count();
+                case "collect" -> collect();
+                default -> throw new IllegalStateException("Could not find function " + function);
+            };
+        } else {
+            return switch (function) {
+                case "sum" -> sum((a) -> {
+                    final Map<String, Object> context = new HashMap<>();
+                    context.put(groupBy.getGiven().getGiven(), a);
+                    return Integer.parseInt((String) new MVELLER(QuotedExprParsed.from(functionParameter)).doTheMVEL(context, definitions));
+                });
+                default ->
+                        throw new IllegalStateException("Could not find function " + function + " with a parameter.");
+            };
+        }
     }
 
     private PatternDef formPattern(final RuleFactory rule,

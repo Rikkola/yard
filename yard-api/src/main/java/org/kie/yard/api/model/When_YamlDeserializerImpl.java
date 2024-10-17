@@ -37,7 +37,10 @@ public class When_YamlDeserializerImpl
         final Accumulator accumulator = new Accumulator();
         accumulator.setFunction((String) groupBy.getNode("function").asScalar().value());
         accumulator.setAs((String) groupBy.getNode("as").asScalar().value());
-        // TODO check what happens with numbers
+        if (groupBy.keys().contains("parameter")) {
+            accumulator.setParameter((String) groupBy.getNode("parameter").asScalar().value());
+        }
+        // TODO All are cast to Strings, check what happens with numbers
         return accumulator;
     }
 

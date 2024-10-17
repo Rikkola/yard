@@ -18,10 +18,11 @@ elements:
                   having:
                     - age >= 18
               grouping:
-                  function: $p.name[0]
+                  function: $p.name[0] # TODO call this grouper?
                   as: $initial
               accumulator:
-                  function: sum($p.kids)
+                  function: sum
+                  parameter: $p.kids
                   as: $kidCount
           then:
             result:
@@ -44,7 +45,7 @@ elements:
                 function: $p.age - ( $p.age % 10 )
                 as: $decade
               accumulator:
-                function: count()
+                function: count
                 as: $amountOfParentsForDecade
           then:
             result:
