@@ -20,8 +20,6 @@ package org.kie.yard.core;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RulesGroupByTest
         extends TestBase {
 
-    private static final String FILE_NAME = "/groupby.yml";
+    private static final String FILE_NAME = "/rules/groupby.yml";
     private String data = """
             {
                 "Persons":

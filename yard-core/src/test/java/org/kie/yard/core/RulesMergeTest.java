@@ -29,14 +29,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RulesMergeTest
         extends TestBase {
 
-    private static final String FILE_NAME = "/merge.yml";
+    private static final String FILE_NAME = "/rules/merge.yml";
 
     @Test
     public void testMerge() throws Exception {
         final String CTX = """
                 {
-                    "Jira 1":[{"name":"Ticket 1", "status":"Blocking"},{"name":"Ticket 2", "status":"Minor"}],
-                    "Jira 2":[{"name":"Ticket 3", "status":"Critical"},{"name":"Ticket 4", "status":"Blocking"}]
+                    "Jira 1":[
+                        {"name":"Ticket 1", "status":"Blocking", "createdAt":"12-12-2000"},
+                        {"name":"Ticket 2", "status":"Minor", "createdAt":"12-12-2000"}
+                    ],
+                    "Jira 2":[
+                        {"name":"Ticket 3", "status":"Critical", "createdAt":"12-12-2000"},
+                        {"name":"Ticket 4", "status":"Blocking", "createdAt":"12-12-2000"}
+                    ]
                 }
                 """;
         final Map<String, Object> outputJSONasMap = evaluate(CTX, FILE_NAME);
@@ -52,6 +58,7 @@ public class RulesMergeTest
         final Map<String, Object> map = new HashMap<>();
         map.put("name", name);
         map.put("status", "Blocking");
+        map.put("createdAt", "12-12-2000");
 
         return map;
     }
