@@ -24,6 +24,7 @@ elements:
                   function: sum
                   parameter: $p.kids
                   as: $kidCount
+                  filter: $kidCount == 0
           then:
             result:
               - put:
