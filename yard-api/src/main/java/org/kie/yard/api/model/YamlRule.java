@@ -9,19 +9,19 @@ import java.util.List;
 @YAMLMapper
 public class YamlRule {
 
-    @YamlTypeDeserializer(When_YamlDeserializerImpl.class)
-    @YamlTypeSerializer(When_YamlSerializerImpl.class)
-    private List<When> when;
+    @YamlTypeDeserializer(Pattern_YamlDeserializerImpl.class)
+    @YamlTypeSerializer(Pattern_YamlSerializerImpl.class)
+    private List<Pattern> when;
 
     @YamlTypeDeserializer(YamlRuleThen_YamlDeserializerImpl.class)
     @YamlTypeSerializer(YamlRuleThen_YamlSerializerImpl.class)
     private YamlRuleThen then;
 
-    public List<When> getWhen() {
+    public List<Pattern> getWhen() {
         return when;
     }
 
-    public void setWhen(List<When> when) {
+    public void setWhen(List<Pattern> when) {
         this.when = when;
     }
 

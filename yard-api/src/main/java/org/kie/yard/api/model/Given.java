@@ -2,7 +2,7 @@ package org.kie.yard.api.model;
 
 import java.util.List;
 
-public class Given implements When {
+public class Given implements Pattern {
     private String given;
     private String from;
     private List<String> having;

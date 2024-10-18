@@ -1,7 +1,6 @@
 package org.kie.yard.core;
 
 import org.drools.ruleunits.api.DataSource;
-import org.drools.ruleunits.dsl.RuleFactory;
 import org.drools.ruleunits.dsl.SyntheticRuleUnit;
 import org.drools.ruleunits.dsl.SyntheticRuleUnitBuilder;
 import org.drools.ruleunits.dsl.accumulate.GroupByPattern1;

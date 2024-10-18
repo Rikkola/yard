@@ -1,7 +1,7 @@
 package org.kie.yard.api.model;
 
 
-public class GroupBy implements When {
+public class GroupBy implements Pattern {
     private Given given;
 
     private Grouping grouping;

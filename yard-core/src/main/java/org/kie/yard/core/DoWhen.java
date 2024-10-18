@@ -24,9 +24,9 @@ public class DoWhen {
 
     public PatternDef doWhen(final YamlRule ruleDefinition,
                              final RuleFactory rule) {
-        final Iterator<When> iterator = ruleDefinition.getWhen().iterator();
+        final Iterator<Pattern> iterator = ruleDefinition.getWhen().iterator();
         while (iterator.hasNext()) {
-            final When when = iterator.next();
+            final Pattern when = iterator.next();
             if (when instanceof Given given) {
                 final Pattern1Def<Object> on = getObjectPattern(rule, given);
                 if (!iterator.hasNext()) {

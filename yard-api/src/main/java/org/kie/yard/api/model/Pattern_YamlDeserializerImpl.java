@@ -3,23 +3,21 @@ package org.kie.yard.api.model;
 import org.kie.j2cl.tools.yaml.mapper.api.YAMLDeserializer;
 import org.kie.j2cl.tools.yaml.mapper.api.exception.YAMLDeserializationException;
 import org.kie.j2cl.tools.yaml.mapper.api.internal.deser.YAMLDeserializationContext;
-import org.kie.j2cl.tools.yaml.mapper.api.node.NodeType;
 import org.kie.j2cl.tools.yaml.mapper.api.node.YamlMapping;
 import org.kie.j2cl.tools.yaml.mapper.api.node.YamlNode;
 
 import java.util.ArrayList;
 
-public class When_YamlDeserializerImpl
-        implements YAMLDeserializer<When> {
+public class Pattern_YamlDeserializerImpl
+        implements YAMLDeserializer<Pattern> {
 
     @Override
-    public When deserialize(YamlMapping yamlMapping, String s, YAMLDeserializationContext yamlDeserializationContext) throws YAMLDeserializationException {
+    public Pattern deserialize(YamlMapping yamlMapping, String s, YAMLDeserializationContext yamlDeserializationContext) throws YAMLDeserializationException {
         return deserialize(yamlMapping.getNode(s), yamlDeserializationContext);
     }
 
     @Override
-    public When deserialize(YamlNode yamlNode, YAMLDeserializationContext yamlDeserializationContext) {
-        final NodeType type = yamlNode.type();
+    public Pattern deserialize(YamlNode yamlNode, YAMLDeserializationContext yamlDeserializationContext) {
         final YamlMapping mapping = yamlNode.asMapping();
         if (mapping.keys().contains("given")) {
             return createGiven(mapping);
