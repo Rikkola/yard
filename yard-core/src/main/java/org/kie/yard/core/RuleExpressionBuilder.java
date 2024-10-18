@@ -31,8 +31,8 @@ public class RuleExpressionBuilder {
         this.name = name;
         this.resultType = ruleExpression.getResult();
         this.rules = ruleExpression.getRules();
-        doThen = new DoThen(resultType, definitions);
-        doWhen = new DoWhen(definitions);
+        this.doThen = new DoThen(resultType, definitions);
+        this.doWhen = new DoWhen(definitions);
     }
 
     public SyntheticRuleUnit build() {
@@ -101,7 +101,6 @@ public class RuleExpressionBuilder {
                 return result;
             default:
                 throw new IllegalStateException("Result type is not set correctly");
-
         }
     }
 }
