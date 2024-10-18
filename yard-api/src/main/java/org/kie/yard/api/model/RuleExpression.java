@@ -1,7 +1,6 @@
 package org.kie.yard.api.model;
 
 import org.kie.j2cl.tools.yaml.mapper.api.annotation.YAMLMapper;
-import org.kie.j2cl.tools.yaml.mapper.api.annotation.YamlTypeDeserializer;
 
 import java.util.List;
 
